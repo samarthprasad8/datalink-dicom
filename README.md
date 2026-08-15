@@ -1,5 +1,7 @@
 # Datalink DICOM
 
+project created through the summer of 2025, consolidated into one repository and made public on 8/15/26
+
 A web platform for running controlled reading studies on AI-assisted radiology.
 
 Datalink was built to answer a specific research question: **does the stated accuracy of an AI assistant change how a radiologist reads a case?** It presents chest radiographs to a participant alongside a simulated AI second opinion whose accuracy is fixed per trial arm, records every decision, and exports the session for analysis.

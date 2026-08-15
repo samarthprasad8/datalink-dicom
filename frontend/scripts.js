@@ -1,4 +1,3 @@
-// scripts.js (Full file with Contrast/Brightness Control)
 // Global variables for state management
 let githubToken = '';
 let githubUsername = '';
@@ -50,9 +49,7 @@ const presentBtn = document.getElementById('present-btn');
 const notPresentBtn = document.getElementById('not-present-btn');
 const uploadBtn = document.getElementById('upload-btn'); 
 const goHomeBtn = document.getElementById('go-home-btn'); 
-// REMOVE: const enforceSettingsBtn = document.getElementById('enforce-settings-btn'); 
 
-// NEW LOCKDOWN BUTTONS
 const lockdownTrial1Btn = document.getElementById('lockdown-trial-1-btn');
 const lockdownTrial2Btn = document.getElementById('lockdown-trial-2-btn');
 const lockdownTrial3Btn = document.getElementById('lockdown-trial-3-btn');
@@ -82,7 +79,6 @@ const aiPanelColumn = document.getElementById('ai-panel-column');
 
 const statusMessage = document.getElementById('status-message');
 
-// NEW REPORT UI Elements
 const reportReviewedCount = document.getElementById('report-reviewed-count');
 const reportTotalTime = document.getElementById('report-total-time');
 const reportUserAccuracy = document.getElementById('report-user-accuracy');
@@ -92,16 +88,14 @@ const reportUploadPath = document.getElementById('report-upload-path');
 
 
 // Backend URL
-// **IMPORTANT:** Replace this with your actual Render backend URL
+// Points at the hosted backend. Change this if running your own instance.
 const backendUrl = 'https://datalink-dicom-backend.onrender.com';
 
 
-// Initialize Canvas
 canvas = document.getElementById('imageCanvas');
 canvasContainer = document.getElementById('image-viewer-container');
 context = canvas.getContext('2d');
 
-// Set up canvas dimensions dynamically
 const resizeCanvas = () => {
     const rect = canvasContainer.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
@@ -151,7 +145,6 @@ canvas.addEventListener('mousemove', (e) => {
         imageState.min = Math.max(0, imageState.min + delta);
         imageState.max = Math.min(255, imageState.max - delta); 
 
-        // Ensure max is always greater than min
         if (imageState.max <= imageState.min) {
             const center = (imageState.max + imageState.min) / 2;
             imageState.max = center + 1;
@@ -169,7 +162,7 @@ canvas.addEventListener('mouseup', () => {
     isAdjustingContrast = false;
 });
 
-// --- MODIFIED WHEEL LISTENER FOR MOUSE-POSITION ZOOM ---
+// Zoom toward the cursor rather than the canvas center.
 canvas.addEventListener('wheel', (e) => {
     if (!imageElement) return;
 
@@ -219,7 +212,6 @@ canvas.addEventListener('wheel', (e) => {
 
     drawImage();
 });
-// ----------------------------------------------------------------------
 
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -442,7 +434,6 @@ startReviewBtn.addEventListener('click', () => {
         }
         sampleSize = 50; // Lockdown size is always 50
     } else {
-         // The original check
         if (isNaN(sampleSize) || sampleSize <= 0 || sampleSize > casesData.length) {
             showStatusMessage(`Please enter a valid sample size between 1 and ${casesData.length}.`, 'error');
             return;
@@ -596,7 +587,7 @@ function parseCSV(csvText) {
 }
 
 function createRepresentativeSample(data, size) {
-     // NEW: Check for lockdown trial mode first
+     // Lockdown trial mode takes precedence over normal sampling.
     if (lockdownTrial === 1) {
         // Trial 1: First 50 cases (index 0-49)
         return data.slice(0, 50);
@@ -650,7 +641,6 @@ async function nextCase() {
     
     const filePath = `${normalizedImagesPath}/${normalizedFileName}`; 
     
-    // Timer setup removed from here
 
     caseCounterSpan.textContent = currentCaseIndex + 1;
     
@@ -662,14 +652,12 @@ async function nextCase() {
     try {
         await loadImageFromBackend(filePath); // Waits until the image is loaded and displayed
         
-        // --- START TIMER LOGIC HERE (After image load) ---
         timerStart = Date.now();
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             const elapsed = (Date.now() - timerStart) / 1000;
             timerSpan.textContent = `${elapsed.toFixed(1)}s`;
         }, 100);
-        // -------------------------------------------------
         
         if (!isAiEnabled) {
             presentBtn.disabled = notPresentBtn.disabled = false;
@@ -692,7 +680,7 @@ async function nextCase() {
     }
 }
 
-// Function to fetch image from the backend (NOW DISPATCHES DICOM/STANDARD)
+// Fetches an image and dispatches to the DICOM or standard renderer.
 async function loadImageFromBackend(filePath) {
     imageState.scale = 1;
     imageState.x = 0;
@@ -769,7 +757,7 @@ function displayStandardImage(fileBlob) {
 }
 
 
-// CRITICAL NEW FUNCTION: Handles DICOM files using Cornerstone
+// Renders DICOM pixel data to canvas via Cornerstone.
 async function displayDicomImage(fileBlob) {
     if (typeof cornerstone === 'undefined' || typeof cornerstoneWADOImageLoader === 'undefined') {
         throw new Error("Cornerstone libraries are not loaded. Cannot display DICOM.");
@@ -887,7 +875,7 @@ function simulateAI(currentCase) {
     setTimeout(() => {
         let correct;
 
-        // NEW LOGIC: Use the fixed pattern if the button was clicked
+        // Use the predetermined correctness pattern when a trial is locked.
         if (aiLiePattern && currentCaseIndex < aiLiePattern.length) {
             // Use the pre-determined correctness based on the case index
             correct = aiLiePattern[currentCaseIndex];
@@ -932,7 +920,6 @@ function endReview() {
         });
         const accuracy = ((correctCount / totalCasesReviewed) * 100).toFixed(1);
 
-        // CORRECTED STATS UPDATES
         if (reportReviewedCount) reportReviewedCount.textContent = totalCasesReviewed;
         if (reportTotalTime) reportTotalTime.textContent = totalTime.toFixed(1) + 's';
         if (reportUserAccuracy) reportUserAccuracy.textContent = accuracy + '%';
@@ -946,7 +933,6 @@ function endReview() {
         if (finalStatsSummary) finalStatsSummary.textContent = `You correctly identified ${correctCount} out of ${totalCasesReviewed} cases (${accuracy}% accuracy).`;
         
     } else {
-        // Handle zero cases reviewed
         if (reportReviewedCount) reportReviewedCount.textContent = '0';
         if (reportTotalTime) reportTotalTime.textContent = '0.0s';
         if (reportUserAccuracy) reportUserAccuracy.textContent = '0.0%';
@@ -1020,7 +1006,6 @@ function setLockdownTrial(trialNumber) {
 function resetLockdown() {
     lockdownTrial = null;
 
-    // 1. Enable AI checkbox
     aiEnabledCheckbox.disabled = false;
 
     // 2. Enable and reset sample size

@@ -15,9 +15,9 @@ const CACHE_TTL = 300 * 1000; // 5 minutes in milliseconds
 
 // Helper function to fetch from GitHub, handling authentication
 async function fetchFromGitHub(url, token) {
-    // --- CRITICAL FIX: Include the token in the cache key for user-specific data ---
-    const cacheKey = `${url}::${token}`; // User A's data is now keyed separately from User B's data
-    // -------------------------------------------------------------------------------
+    // Key on token as well as URL: keying on URL alone would let concurrent
+    // users receive each other's authorized content from the cache.
+    const cacheKey = `${url}::${token}`;
     
     if (cache.has(cacheKey) && (Date.now() - cache.get(cacheKey).timestamp < CACHE_TTL)) {
         console.log(`[BACKEND TRACE] Cache HIT for URL: ${url}`);
@@ -37,9 +37,7 @@ async function fetchFromGitHub(url, token) {
     return data;
 }
 
-// --------------------------------------------------------------------------
-// CRITICAL LFS HELPER FUNCTION: Fetches the actual binary LFS file content
-// --------------------------------------------------------------------------
+// Resolves a Git LFS pointer to the actual binary file content.
 async function fetchLFSContent(githubRepo, githubToken, lfsPointerContent) {
     console.log(`[BACKEND TRACE - LFS] Starting LFS fetch for repo: ${githubRepo}`);
 
@@ -124,7 +122,6 @@ async function fetchLFSContent(githubRepo, githubToken, lfsPointerContent) {
         throw new Error(`Failed to download LFS content with status ${finalDownloadResponse.status}`);
     }
 
-    // Return the raw response, allowing the caller to handle it as a blob/buffer
     console.log(`[BACKEND TRACE - LFS] Successfully retrieved LFS content. Returning raw response.`);
     return finalDownloadResponse;
 }
@@ -154,7 +151,7 @@ app.post('/api/fetch-file', async (req, res) => {
             if (fileContent.startsWith('version https://git-lfs.github.com/spec/v1')) {
                 console.log(`[BACKEND TRACE] File is an LFS pointer. Delegating to LFS handler.`);
                 
-                // CRITICAL: Call the LFS handler to get the raw binary response
+                // Response is an LFS pointer, not the file — resolve it.
                 const lfsResponse = await fetchLFSContent(githubRepo, githubToken, fileContent);
 
                 // Set headers based on the LFS response and pipe the data

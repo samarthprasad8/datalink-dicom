@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+body {
+    /* Base font settings and layout */
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    /* Dark background from previous styles */
+    background-color: #0f172a; /* slate-900 */ 
+    
+    /* MODIFICATION: Center content vertically and horizontally */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center; 
+}
+
+.container-fluid {
+    /* MODIFICATION 1: Reduce max-width significantly to make the design feel tighter and centered */
+    max-width: 960px; /* Reduced from 1400px for a tighter, centered look */
+    width: 90vw; /* Allow it to take 90% of viewport width */
+    min-width: 300px; /* Set a reasonable minimum width */
+    flex-grow: 0;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    /* Removed align-self: center as margin: auto in HTML will handle centering within body */
+}
+
+#image-viewer-container {
+    position: relative;
+    background-color: #0d1a29; /* A very dark blue-gray */
+    overflow: hidden;
+    border-radius: 1rem;
+    width: 100%;
+    
+    /* Using viewport height (vh) for a dynamic size */
+    height: 60vh; 
+    min-height: 400px; /* Set a minimum height to prevent the image from being too small */
+    max-height: 750px;
+}
+
+/* Make the canvas take full space inside its container and apply border */
+#imageCanvas {
+    /* Using a subtle border color for the image container */
+    border: 1px solid #334155; /* slate-700 */
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Custom Tailwind range style for better aesthetics (Updated for Sleek Look) */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px; 
+    height: 18px;
+    background: #06b6d4; /* cyan-500 */
+    cursor: pointer;
+    border-radius: 9999px;
+    /* Deeper shadow and transition for a modern, interactive element */
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.4), 0 2px 5px rgba(0, 0, 0, 0.4); 
+    transition: background 0.2s, transform 0.2s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #0891b2; /* cyan-600 */
+    transform: scale(1.1);
+}
+
+.timer-pulse {
+    /* Updated pulse animation to match the new dark theme/yellow accent for the timer */
+    animation: pulse-border 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(202, 160, 0, 0.3); /* Desaturated yellow */
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(202, 160, 0, 0);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(202, 160, 0, 0);
+        transform: scale(1);
+    }
+}
